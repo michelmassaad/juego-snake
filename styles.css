@@ -1,58 +1,132 @@
+:root {
+    --fondo-pagina: #e0e5ec;
+    --verde-nokia: #97b329;
+    --pixel-oscuro: #2a331a;
+}
+
 * {
-    font-family: "Share Tech Mono", monospace;
-  }
-
-/* Ajustes del tablero */
-#board, .boardInfo{
-    max-width: 500px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Press Start 2P', cursive;
 }
 
-#board{
-    display: grid;
-    grid-template-columns: repeat(10,1fr);
-    background-color: black;
-    border: 5px solid #006400;
+body {
+    background-color: var(--fondo-pagina);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-#start, .boardInfo{
-    font-size: 25px;
+.contenedor-nokia {
+    background-color: var(--verde-nokia);
+    padding: 25px;
+    width: 95%;
+    max-width: 600px;
+    border: 8px solid #111;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-#gameOver{
-    display: none;
-}
-
-.boardInfo{
+.panel-estadisticas {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
+    margin-bottom: 20px;
+    color: var(--pixel-oscuro);
+    font-size: 1rem;
+    font-weight: bold;
 }
 
-#start {
-    background-color: red;
-    border: none;
-    color: white;
-}
-
-#scoreBoard{
-    display: inline-flex;
-}
-
-
-/* Estilo de las celdas */
-.square{
+.contenedor-pantalla {
+    position: relative;
+    width: 100%;
     aspect-ratio: 1;
-    border: 1px solid #006400;  /* Borde verde oscuro */
+    background-color: var(--verde-nokia);
+    border: 5px dashed var(--pixel-oscuro);
+    padding: 3px;
 }
-/* Celdas vacías (fondo) */
-.emptySquare {
-    background-color: black;
+
+#tablero-juego {
+    width: 100%;
+    height: 100%;
+    display: grid;
 }
-/* Celdas de la serpiente */
-.snakeSquare {
-    background-color: #00FF00;
+
+.parte-serpiente {
+    background-color: var(--pixel-oscuro);
+    border: 1px solid var(--verde-nokia);
 }
-/* Comida de la serpiente */
-.foodSquare {
-    background-color: red;
+
+.comida {
+    background-color: var(--pixel-oscuro);
+    animation: parpadeo 0.6s infinite; 
+}
+
+.superposicion {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--verde-nokia);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
+    color: var(--pixel-oscuro);
+}
+
+.superposicion h1 {
+    font-size: 2.2rem;
+    line-height: 1.5;
+}
+
+.superposicion h2 {
+    font-size: 2.2rem;
+}
+
+.superposicion p {
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.parpadeo {
+    animation: parpadeo 1.2s infinite;
+}
+
+@keyframes parpadeo {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.oculto {
+    display: none !important;
+}
+
+/* Estilos para los botones físicos */
+.panel-controles {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Espacio entre los dos botones */
+    margin-top: 25px;
+}
+
+#btn-pausa, #btn-reiniciar {
+    background-color: var(--pixel-oscuro);
+    color: var(--verde-nokia);
+    border: 4px solid var(--pixel-oscuro);
+    width: 180px; 
+    height: 50px; 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem; /* Letra apenas más chica para que entre todo */
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.4); 
+    transition: all 0.1s ease;
+    position: relative;
+}
+
+#btn-pausa:active, #btn-reiniciar:active {
+    box-shadow: inset 4px 4px 0 rgba(0,0,0,0.6); 
 }

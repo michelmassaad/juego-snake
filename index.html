@@ -1,22 +1,51 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Snake | Nokia Clásico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js" type="text/javascript" defer></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div id="board"></div>
-    <div class="boardInfo">
-        <div>
-            Score: <div id="scoreBoard"></div>
+    <div class="contenedor-nokia">
+        <div class="panel-estadisticas">
+            <div class="caja-puntaje">
+                <span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" width="0" height="0">0: <span id="puntaje">0</span></span>
+            </div>
+            <div class="caja-puntaje">
+                <span>0: <span id="puntaje-maximo">0</span> Y</span>
+            </div>
         </div>
-        <button id="start">Start</button>
-    </div>
-    <div id="gameOver">Game Over</div>
-</body>
 
+        <div class="contenedor-pantalla">
+            <div id="pantalla-inicio" class="superposicion">
+                <h1>SNAKE<br><br>CLÁSICO</h1>
+                <p class="parpadeo">PRESIONA CUALQUIER<br>TECLA PARA INICIAR</p>
+            </div>
+
+            <div id="pantalla-fin-juego" class="superposicion oculto">
+                <h2>FIN DEL JUEGO</h2>
+                <br>
+                <p>PUNTAJE: <span id="puntaje-final">0</span></p>
+                <br><br>
+                <p class="parpadeo">PRESIONA ENTER<br>PARA REINICIAR</p>
+            </div>
+
+            <div id="pantalla-pausa" class="superposicion oculto">
+                <h2>PAUSADO</h2>
+                <br><br>
+                <p class="parpadeo">PRESIONA 'P' O<br>EL BOTÓN</p>
+            </div>
+
+            <div id="tablero-juego"></div>
+        </div>
+
+        <div class="panel-controles">
+            <button id="btn-pausa">|| PAUSAR</button>
+            <button id="btn-reiniciar">↺ REINICIAR</button>
+        </div>
+    </div>
+</body>
 </html>

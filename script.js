@@ -1,159 +1,286 @@
-//Html elements
-const board = document.getElementById('board');
-const scoreBoard = document.getElementById('scoreBoard');
-const startButton = document.getElementById('start');
-const gameOverSign = document.getElementById('gameOver');
+/**
+ * Clase principal que gestiona la lógica, el estado y el renderizado del juego Snake.
+ */
+class JuegoSnake {
+    constructor() {
+        // Configuraciones base
+        this.tamanoTablero = 20; 
+        this.velocidadBase = 130; 
+        this.velocidadActual = this.velocidadBase;
+        
+        // Elementos del DOM (Pantallas y textos)
+        this.elementoTablero = document.getElementById('tablero-juego');
+        this.elementoPuntaje = document.getElementById('puntaje');
+        this.elementoPuntajeMaximo = document.getElementById('puntaje-maximo');
+        this.pantallaInicio = document.getElementById('pantalla-inicio');
+        this.pantallaFinJuego = document.getElementById('pantalla-fin-juego');
+        this.pantallaPausa = document.getElementById('pantalla-pausa');
+        this.elementoPuntajeFinal = document.getElementById('puntaje-final');
+        
+        // Elementos del DOM (Botones)
+        this.btnPausa = document.getElementById('btn-pausa');
+        this.btnReiniciar = document.getElementById('btn-reiniciar');
 
-//Game settings
+        // Variables de estado del juego
+        this.serpiente = [];
+        this.comida = {};
+        this.direccion = { x: 0, y: 0 };
+        this.proximaDireccion = { x: 0, y: 0 }; 
+        this.puntaje = 0;
+        this.puntajeMaximo = localStorage.getItem('puntajeMaximoSnakeNokia') || 0;
+        this.cicloJuego = null;
+        
+        // Banderas de estado
+        this.juegoEnEjecucion = false;
+        this.juegoTerminado = false;
+        this.estaPausado = false;
 
-const boardSize = 10;
-const gameSpeed = 100;
-const squareTypes = {
-    emptySquare: 0,
-    snakeSquare: 1,
-    foodSquare: 2
-};
-
-// esto es por los cuadrados de la matriz
-const directions = {
-    ArrowUp: -10,
-    ArrowDown: 10,
-    ArrowRight: 1,
-    ArrowLeft: -1
-};
-
-//Game variables
-let snake;
-let score;
-let direction;
-let boardSquares;
-let emptySquares;
-let moveInterval;
-
-
-const drawSnake = () => {
-    snake.forEach( square => drawSquare(square, 'snakeSquare'));
-}
-
-// Rellena cada cuadrado del tablero
-// @params 
-// square: posicion del cuadrado,
-// type: tipo de cuadrado (emptySquare, snakeSquare, foodSquare)
-const drawSquare = (square, type) => {
-    const [ row, column ] = square.split('');
-    boardSquares[row][column] = squareTypes[type];
-    const squareElement = document.getElementById(square);
-    squareElement.setAttribute('class', `square ${type}`);
-
-    if(type === 'emptySquare') {
-        emptySquares.push(square);
-    } else {
-        if(emptySquares.indexOf(square) !== -1) {
-            emptySquares.splice(emptySquares.indexOf(square), 1);
-        }
+        this.inicializar();
     }
-}
 
-const moveSnake = () => {
-    const newSquare = String(
-        Number(snake[snake.length - 1]) + directions[direction])
-        .padStart(2, '0');
-    const [row, column] = newSquare.split('');
+    /**
+     * Configura el tablero y los eventos iniciales.
+     */
+    inicializar() {
+        // Configurar la cuadrícula de CSS
+        this.elementoTablero.style.gridTemplateColumns = `repeat(${this.tamanoTablero}, 1fr)`;
+        this.elementoTablero.style.gridTemplateRows = `repeat(${this.tamanoTablero}, 1fr)`;
+        this.elementoPuntajeMaximo.innerText = this.puntajeMaximo;
 
+        // Escuchar teclado
+        document.addEventListener('keydown', (evento) => this.manejarEntrada(evento));
+        
+        // Escuchar botón de pausa
+        this.btnPausa.addEventListener('click', () => {
+            if (this.juegoEnEjecucion && !this.juegoTerminado) {
+                this.alternarPausa();
+            }
+            this.btnPausa.blur(); // Evita que quede seleccionado
+        });
 
-    if( newSquare < 0 || 
-        newSquare > boardSize * boardSize  ||
-        (direction === 'ArrowRight' && column == 0) ||
-        (direction === 'ArrowLeft' && column == 9 ||
-        boardSquares[row][column] === squareTypes.snakeSquare) ) {
-        gameOver();
-    } else {
-        snake.push(newSquare);
-        if(boardSquares[row][column] === squareTypes.foodSquare) {
-            addFood();
+        // Escuchar botón de reiniciar
+        this.btnReiniciar.addEventListener('click', () => {
+            this.iniciarJuego();
+            this.btnReiniciar.blur();
+        });
+    }
+
+    /**
+     * Resetea todas las variables y arranca una partida nueva.
+     */
+    iniciarJuego() {
+        this.juegoEnEjecucion = true;
+        this.juegoTerminado = false;
+        this.estaPausado = false;
+        this.btnPausa.innerText = '|| PAUSAR'; 
+        
+        // La serpiente inicia con 3 bloques
+        this.serpiente = [
+            { x: 10, y: 10 }, 
+            { x: 10, y: 11 }, 
+            { x: 10, y: 12 }  
+        ];
+        this.direccion = { x: 0, y: -1 }; 
+        this.proximaDireccion = { x: 0, y: -1 };
+        
+        this.puntaje = 0;
+        this.velocidadActual = this.velocidadBase;
+        this.actualizarPuntaje();
+        
+        // Ocultar todas las pantallas superpuestas
+        this.pantallaInicio.classList.add('oculto');
+        this.pantallaFinJuego.classList.add('oculto');
+        this.pantallaPausa.classList.add('oculto');
+        
+        this.generarComida();
+        this.iniciarCiclo();
+    }
+
+    /**
+     * Arranca o reanuda el intervalo de frames del juego.
+     */
+    iniciarCiclo() {
+        if (this.cicloJuego) clearInterval(this.cicloJuego);
+        this.cicloJuego = setInterval(() => this.actualizarLogica(), this.velocidadActual);
+    }
+
+    /**
+     * Pausa o reanuda la partida actual.
+     */
+    alternarPausa() {
+        this.estaPausado = !this.estaPausado;
+        
+        if (this.estaPausado) {
+            clearInterval(this.cicloJuego); 
+            this.pantallaPausa.classList.remove('oculto');
+            this.btnPausa.innerText = '> JUGAR';
         } else {
-            const emptySquare = snake.shift();
-            drawSquare(emptySquare, 'emptySquare');
+            this.pantallaPausa.classList.add('oculto');
+            this.iniciarCiclo(); 
+            this.btnPausa.innerText = '|| PAUSAR';
         }
-        drawSnake();
+    }
+
+    /**
+     * Motor principal: calcula posiciones, colisiones y alimentación en cada frame.
+     */
+    actualizarLogica() {
+        this.direccion = this.proximaDireccion;
+
+        let nuevaCabeza = {
+            x: this.serpiente[0].x + this.direccion.x,
+            y: this.serpiente[0].y + this.direccion.y
+        };
+
+        // Lógica Pac-Man: Atravesar las paredes
+        if (nuevaCabeza.x > this.tamanoTablero) nuevaCabeza.x = 1;
+        else if (nuevaCabeza.x < 1) nuevaCabeza.x = this.tamanoTablero;
+
+        if (nuevaCabeza.y > this.tamanoTablero) nuevaCabeza.y = 1;
+        else if (nuevaCabeza.y < 1) nuevaCabeza.y = this.tamanoTablero;
+
+        // Verificar si choca consigo misma
+        if (this.verificarColision(nuevaCabeza)) {
+            return this.finDelJuego();
+        }
+
+        // Mover serpiente
+        this.serpiente.unshift(nuevaCabeza);
+
+        // Lógica de alimentación
+        if (nuevaCabeza.x === this.comida.x && nuevaCabeza.y === this.comida.y) {
+            this.puntaje += 10;
+            this.actualizarPuntaje();
+            this.generarComida();
+            
+            // Aumentar dificultad progresivamente
+            if (this.puntaje % 50 === 0 && this.velocidadActual > 60) {
+                this.velocidadActual -= 5; 
+                this.iniciarCiclo(); 
+            }
+        } else {
+            // Si no come, avanza eliminando la cola
+            this.serpiente.pop(); 
+        }
+
+        this.dibujar();
+    }
+
+    /**
+     * Revisa si la coordenada dada colisiona con el cuerpo de la serpiente.
+     */
+    verificarColision(cabeza) {
+        return this.serpiente.some(segmento => segmento.x === cabeza.x && segmento.y === cabeza.y);
+    }
+
+    /**
+     * Crea una nueva comida en una ubicación aleatoria vacía.
+     */
+    generarComida() {
+        let nuevaPosicionComida;
+        while (true) {
+            nuevaPosicionComida = {
+                x: Math.floor(Math.random() * this.tamanoTablero) + 1,
+                y: Math.floor(Math.random() * this.tamanoTablero) + 1
+            };
+            const estaSobreSerpiente = this.serpiente.some(segmento => segmento.x === nuevaPosicionComida.x && segmento.y === nuevaPosicionComida.y);
+            if (!estaSobreSerpiente) break;
+        }
+        this.comida = nuevaPosicionComida;
+    }
+
+    /**
+     * Procesa los eventos del teclado.
+     */
+    manejarEntrada(evento) {
+        // Prevenir scroll
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight", " "].indexOf(evento.key) > -1) {
+            evento.preventDefault();
+        }
+
+        // Acciones globales
+        if (this.juegoEnEjecucion && !this.juegoTerminado && (evento.key === 'p' || evento.key === 'P' || evento.key === 'Escape')) {
+            this.alternarPausa();
+            return;
+        }
+
+        if (!this.juegoEnEjecucion && !this.juegoTerminado) {
+            this.iniciarJuego();
+            return; 
+        }
+
+        if (this.juegoTerminado && (evento.key === 'Enter' || evento.key === ' ')) {
+            this.iniciarJuego();
+            return;
+        }
+
+        // Controles de movimiento
+        if (this.juegoEnEjecucion && !this.estaPausado) {
+            switch (evento.key) {
+                case 'ArrowUp': case 'w': case 'W':
+                    if (this.direccion.y !== 1) this.proximaDireccion = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown': case 's': case 'S':
+                    if (this.direccion.y !== -1) this.proximaDireccion = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft': case 'a': case 'A':
+                    if (this.direccion.x !== 1) this.proximaDireccion = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight': case 'd': case 'D':
+                    if (this.direccion.x !== -1) this.proximaDireccion = { x: 1, y: 0 };
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Actualiza el puntaje actual y el máximo histórico en pantalla y en memoria.
+     */
+    actualizarPuntaje() {
+        this.elementoPuntaje.innerText = this.puntaje;
+        if (this.puntaje > this.puntajeMaximo) {
+            this.puntajeMaximo = this.puntaje;
+            this.elementoPuntajeMaximo.innerText = this.puntajeMaximo;
+            localStorage.setItem('puntajeMaximoSnakeNokia', this.puntajeMaximo);
+        }
+    }
+
+    /**
+     * Limpia y vuelve a pintar todos los elementos en la cuadrícula CSS.
+     */
+    dibujar() {
+        this.elementoTablero.innerHTML = ''; 
+
+        // Dibujar serpiente
+        this.serpiente.forEach((segmento) => {
+            const elSerpiente = document.createElement('div');
+            elSerpiente.style.gridColumnStart = segmento.x;
+            elSerpiente.style.gridRowStart = segmento.y;
+            elSerpiente.classList.add('parte-serpiente');
+            this.elementoTablero.appendChild(elSerpiente);
+        });
+
+        // Dibujar comida
+        const elComida = document.createElement('div');
+        elComida.style.gridColumnStart = this.comida.x;
+        elComida.style.gridRowStart = this.comida.y;
+        elComida.classList.add('comida');
+        this.elementoTablero.appendChild(elComida);
+    }
+
+    /**
+     * Detiene el juego y muestra la pantalla final.
+     */
+    finDelJuego() {
+        clearInterval(this.cicloJuego);
+        this.juegoEnEjecucion = false;
+        this.juegoTerminado = true;
+        this.elementoPuntajeFinal.innerText = this.puntaje;
+        this.pantallaFinJuego.classList.remove('oculto');
     }
 }
 
-const addFood = () => {
-    score++;
-    updateScore();
-    createRandomFood();
-}
-
-const gameOver = () => {
-    gameOverSign.style.display = 'flex';
-    clearInterval(moveInterval)
-    startButton.disabled = false;
-}
-
-const setDirection = newDirection => {
-    direction = newDirection;
-}
-
-const directionEvent = key => {
-    switch (key.code) {
-        case 'ArrowUp':
-            direction != 'ArrowDown' && setDirection(key.code)
-            break;
-        case 'ArrowDown':
-            direction != 'ArrowUp' && setDirection(key.code)
-            break;
-        case 'ArrowLeft':
-            direction != 'ArrowRight' && setDirection(key.code)
-            break;
-        case 'ArrowRight':
-            direction != 'ArrowLeft' && setDirection(key.code)
-            break;
-    }
-}
-
-const createRandomFood = () => {
-    const randomEmptySquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-    drawSquare(randomEmptySquare, 'foodSquare');
-}
-
-const updateScore = () => {
-    scoreBoard.innerText = score;
-}
-
-const createBoard = () => {
-    boardSquares.forEach( (row, rowIndex) => {
-        row.forEach( (column, columnndex) => {
-            const squareValue = `${rowIndex}${columnndex}`;
-            const squareElement = document.createElement('div');
-            squareElement.setAttribute('class', 'square emptySquare');
-            squareElement.setAttribute('id', squareValue);
-            board.appendChild(squareElement);
-            emptySquares.push(squareValue);
-        })
-    })
-}
-
-const setGame = () => {
-    snake = ['00', '01', '02', '03'];
-    score = snake.length;
-    direction = 'ArrowRight';
-    boardSquares = Array.from(Array(boardSize), () => new Array(boardSize).fill(squareTypes.emptySquare));
-    // console.log(boardSquares);
-    board.innerHTML = '';
-    emptySquares = [];
-    createBoard();
-}
-
-const startGame = () => {
-    setGame();
-    gameOverSign.style.display = 'none';
-    startButton.disabled = true;
-    drawSnake();
-    updateScore();
-    createRandomFood();
-    document.addEventListener('keydown', directionEvent);
-    moveInterval = setInterval( () => moveSnake(), gameSpeed);
-}
-
-startButton.addEventListener('click', startGame);
+// Iniciar la clase cuando el HTML cargue
+document.addEventListener('DOMContentLoaded', () => {
+    new JuegoSnake();
+});
