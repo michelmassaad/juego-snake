@@ -1,0 +1,58 @@
+* {
+    font-family: "Share Tech Mono", monospace;
+  }
+
+/* Ajustes del tablero */
+#board, .boardInfo{
+    max-width: 500px;
+}
+
+#board{
+    display: grid;
+    grid-template-columns: repeat(10,1fr);
+    background-color: black;
+    border: 5px solid #006400;
+}
+
+#start, .boardInfo{
+    font-size: 25px;
+}
+
+#gameOver{
+    display: none;
+}
+
+.boardInfo{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+#start {
+    background-color: red;
+    border: none;
+    color: white;
+}
+
+#scoreBoard{
+    display: inline-flex;
+}
+
+
+/* Estilo de las celdas */
+.square{
+    aspect-ratio: 1;
+    border: 1px solid #006400;  /* Borde verde oscuro */
+}
+/* Celdas vacías (fondo) */
+.emptySquare {
+    background-color: black;
+}
+/* Celdas de la serpiente */
+.snakeSquare {
+    background-color: #00FF00;
+}
+/* Comida de la serpiente */
+.foodSquare {
+    background-color: red;
+}
