@@ -1,9 +1,6 @@
-# 🐍 **Snake Clásico** – Estilo Nokia 3310
+# 🐍 **Snake Clásico** – Estilo Nokia 3310
 
-[![JavaScript](https://img.shields.io/badge/JS-ES6+-yellow?logo=javascript)](https://developer.mozilla.org/docs/Web/JavaScript)  
-[![HTML5](https://img.shields.io/badge/HTML5-orange?logo=html5)](https://developer.mozilla.org/docs/Web/HTML)  
-[![CSS3](https://img.shields.io/badge/CSS3-blue?logo=css3)](https://developer.mozilla.org/docs/Web/CSS)  
-[![Live Demo](https://img.shields.io/badge/🕹️-Live%20Game-blue)](https://michelmassaad.github.io/juego-snake/)
+[![JavaScript](https://img.shields.io/badge/JS-ES6+-yellow?logo=javascript)](https://developer.mozilla.org/docs/Web/JavaScript) [![HTML5](https://img.shields.io/badge/HTML5-orange?logo=html5)](https://developer.mozilla.org/docs/Web/HTML) [![CSS3](https://img.shields.io/badge/CSS3-blue?logo=css3)](https://developer.mozilla.org/docs/Web/CSS) [![Live Demo](https://img.shields.io/badge/🕹️-Live%20Game-blue)](https://michelmassaad.github.io/juego-snake/)
 
 ---
 
