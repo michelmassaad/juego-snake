@@ -1,29 +1,70 @@
-# 🐍 Snake Clásico | Estilo Nokia 3310
+# 🐍 **Snake Clásico** – Estilo Nokia 3310
 
-Un clon del mítico juego Snake de los teléfonos Nokia, desarrollado con Vanilla JavaScript, aplicando Programación Orientada a Objetos (POO) y buenas prácticas de Clean Code. 
+[![JavaScript](https://img.shields.io/badge/JS-ES6+-yellow?logo=javascript)](https://developer.mozilla.org/docs/Web/JavaScript)  
+[![HTML5](https://img.shields.io/badge/HTML5-orange?logo=html5)](https://developer.mozilla.org/docs/Web/HTML)  
+[![CSS3](https://img.shields.io/badge/CSS3-blue?logo=css3)](https://developer.mozilla.org/docs/Web/CSS)  
+[![Live Demo](https://img.shields.io/badge/🕹️-Live%20Game-blue)](https://michelmassaad.github.io/juego-snake/)
 
-* **[🎮 Jugar ahora en vivo](https://michelmassaad.github.io/juego-snake/)**
+---
 
-![Vista previa del juego](./juego-comenzado.png)
+## 🚀 Elevator Pitch
 
-## 👾 Características del Proyecto
+Clon ejecutable del mítico *Snake* de los Nokia 3310. Implementado **sin frameworks**, el proyecto muestra cómo aplicar buenas prácticas de ingeniería de software en un “toy‑app” ligero: diseño orientado a objetos, separación de responsabilidades y código limpio.  
+Juega directamente en tu navegador: **[🎮 Demo en vivo](https://michelmassaad.github.io/juego-snake/)**.
 
-* **Estética Retro Realista:** Diseño inspirado en las pantallas LCD de matriz de puntos (fósforo verde), utilizando variables CSS nativas y la tipografía pixelada `Press Start 2P`.
-* **Motor de Juego POO:** Toda la lógica está encapsulada en la clase `JuegoSnake`, separando el estado del juego del renderizado en el DOM para mayor escalabilidad.
-* **Mecánica "Pac-Man":** Efecto *wrap-around* implementado. Si la serpiente atraviesa un borde, aparece por el lado opuesto.
-* **Dificultad Progresiva:** El motor aumenta la velocidad del ciclo de juego (frame rate) progresivamente a medida que aumenta el puntaje.
-* **Persistencia de Datos:** El puntaje máximo histórico (High Score) se guarda automáticamente en el `localStorage` del navegador.
-* **Controles Físicos y de Teclado:** Soporte para jugar con teclado (Flechas, WASD) y botones en pantalla interactivos, incluyendo función de Pausa y Reinicio.
+---
 
-## 🛠️ Tecnologías Utilizadas
+## 🏗️ Arquitectura y decisiones técnicas
 
-* **HTML5:** Estructura semántica.
-* **CSS3:** Flexbox, CSS Grid (para el renderizado del tablero por coordenadas exactas) y animaciones de keyframes (efecto parpadeo).
-* **JavaScript (ES6+):** Lógica orientada a objetos, manejo de eventos y manipulación dinámica del DOM sin librerías externas.
+- **POO como columna vertebral**  
+  La clase `JuegoSnake` actúa como *estado único* del juego; controla velocidad, posiciones, colisiones y la lógica de crecimiento. Esta encapsulación permite instanciar el motor sin depender del DOM, lo cual facilita pruebas unitarias o reutilización.
 
-## 💻 Instalación y Uso Local
+- **Separation of Concerns (SoC)**  
+  - **Modelo**: coordenadas de la serpiente, manzana, puntuación y persistencia (`localStorage`).  
+  - **Vista**: renderizado del tablero con CSS Grid y actualización declarativa del DOM.  
+  - **Controlador**: intérprete de eventos (teclado/controles táctiles) y gestor de lazo de juego (`requestAnimationFrame`).
 
-Estos pasos permiten ejecutar el juego en tu equipo para jugar, explorar el código o realizar modificaciones:
+- **Clean Code**  
+  - Nombres auto‑explicativos (`direccionActual`, `colisionaConCuerpo`).  
+  - Constantes configurables (`TAM_TABLERO`, `VELOCIDAD_INICIAL`) definidas en la parte superior.  
+  - Evitación de «magia» y comentarios redundantes; la lógica se expresa a través de funciones pequeñas y puras.
+
+- **Render optimizado**  
+  Sólo se actualiza la celda del tablero que cambia; el bucle de juego calcula diferencias y modifica el DOM de forma mínima, evitando repintados innecesarios.
+
+- **Escalabilidad**  
+  - Mecanismo de **wrap‑around** configurable: fácil de desactivar o convertir en colisión frontal.  
+  - Velocidad progresiva controlada por un método `ajustarVelocidad()` desacoplado del ciclo principal.
+
+- **Persistencia ligera**  
+  El `localStorage` guarda el **High Score** con un adaptador sencillo (`StorageManager`), permitiendo cambiarlo por IndexedDB o servidor si se desea.
+
+---
+
+## ✨ Características principales
+
+- 🎨 *Estética retro* con tipografía `Press Start 2P` y colores estilo LCD.  
+- 🕹️ Controles flexibles: teclado (Flechas/WASD), botones táctiles, pausa (`P`) y reinicio (`R`).  
+- ↩️ Mecánica “Pac‑Man”: la serpiente reaparece en el lado opuesto.  
+- 📈 Dificultad aumenta con el puntaje.  
+- 💾 High score persistente en `localStorage`.  
+- ⚙️ Código modular y libre de dependencias externas.
+
+---
+
+## 🧰 Stack tecnológico
+
+| Capa        | Tecnologías / Herramientas          |
+|-------------|-------------------------------------|
+| Frontend    | HTML5, CSS3 (Grid, Flexbox, keyframes), JavaScript ES6+ |
+| Persistencia| `localStorage`                      |
+| Herramientas| VS Code, Live Server (para desarrollo local)             |
+
+---
+
+## 💻 Instalación y ejecución local
+
+Clonar, abrir y jugar. No hay dependencias.
 
 ```bash
 # clonar el repositorio
@@ -31,25 +72,29 @@ git clone https://github.com/michelmassaad/juego-snake.git
 cd juego-snake
 ```
 
-1. Abre el archivo `index.html` con tu navegador favorito.
-   - Alternativamente, puedes iniciar un servidor local (por ejemplo con la extensión **Live Server** de VS Code o `python -m http.server`) para evitar restricciones de CORS al cargar recursos.
-2. Juega con el teclado (Flechas o WASD) o usa los botones táctiles en pantalla. Puedes pausar con la tecla `P` y reiniciar con `R`.
+1. Abre `index.html` con tu navegador.  
+   - O bien levanta un servidor local (`python -m http.server`, Live Server de VS Code) para evitar restricciones CORS.  
+2. Usa las **flechas** o **WASD** para mover; pulsa `P` para pausar y `R` para reiniciar.  
+3. El high‑score se guarda automáticamente en tu navegador.
 
-> 🔧 Este proyecto no requiere dependencias externas ni compilación; está construido con HTML/CSS/JS puros.
-
-## 🤝 Contribuciones
-
-Si te interesa ampliar el juego o mejorar el código, eres bienvenido a:
-
-1. Abrir un *issue* describiendo tu idea o reporte.
-2. Crear un *fork* y un *pull request* con tus cambios.
-
-## ℹ️ Autor
-
-**Michel Massaad** – Estudiante de Sistemas (UTN) y desarrollador de software.
-
-*GitHub:* [@michelmassaad](https://github.com/michelmassaad)
+> ⚠️ No se requiere `npm`, compiladores ni librerías; código “vanilla” listo para producción.
 
 ---
 
-Gracias por jugar y revisar el código. ¡Espero que te diviertas y aprendas algo nuevo! 🎉
+## 🤝 Contribuciones
+
+1. Abre un *issue* detallando tu idea o bug.  
+2. Haz un *fork* y envía un *pull request*.  
+3. Sigue las convenciones de estilo y añade pruebas si es posible.
+
+---
+
+## 👤 Autor
+
+**Michel Massaad** – Software Developer  
+- GitHub: [@michelmassaad](https://github.com/michelmassaad)  
+- LinkedIn: *(aquí tu enlace)*
+
+---
+
+Gracias por explorar el código. Este proyecto es una demostración de cómo una aplicación sencilla puede mantenerse limpia y extensible mediante principios sólidos de ingeniería. ¡Disfruta el juego y siéntete libre de mejorar o reutilizar cualquier parte!
