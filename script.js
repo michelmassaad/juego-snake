@@ -283,4 +283,4 @@ class JuegoSnake {
 // Iniciar la clase cuando el HTML cargue
 document.addEventListener('DOMContentLoaded', () => {
     new JuegoSnake();
-});
+});s
